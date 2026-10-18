@@ -16,7 +16,7 @@ OpenCL 调优缓存和模型权重都在目录内，不依赖文件夹外的任�
 ### 目录结构
 
 ```
-9x9_KataReconstructor_commit/
+9x9_GoReconstructor/
 ├─ main/main.py                  主程序：按层启发式搜索重建棋谱
 ├─ prior/                        四个可独立运行的子任务
 │   ├─ from_manual_to_situation.py   完整棋谱 -> 只含终盘的摆子局面 SGF
@@ -181,7 +181,7 @@ folder is required.
 ### Layout
 
 ```
-9x9_KataReconstructor_commit/
+9x9_GoReconstructor/
 ├─ main/main.py                  Entry point: beam-search reconstruction
 ├─ prior/                        Four independent sub-tasks
 │   ├─ from_manual_to_situation.py   Game record -> terminal-only setup SGF
