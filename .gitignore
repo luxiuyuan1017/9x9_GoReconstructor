@@ -1,0 +1,15 @@
+﻿# Python
+__pycache__/
+*.py[cod]
+.venv/
+
+# 运行产物
+output/
+prediction/
+situation/
+analysis_logs/
+*.log
+
+# 编辑器
+.vscode/
+.idea/

@@ -1,0 +1,8 @@
+# 运行本项目所需的 Python 包（Python 3.11+）
+# 安装：  pip install -r requirements.txt
+
+sgfmill>=1.1.1
+numpy>=1.24
+matplotlib>=3.7
+# Python 3.10 及以下才需要（3.11 起标准库自带 tomllib）
+tomli>=2.0; python_version < "3.11"
