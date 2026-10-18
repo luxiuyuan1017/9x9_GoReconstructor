@@ -1,4 +1,4 @@
-# 9x9 KataReconstructor — 自包含发布版
+﻿# 9x9 KataReconstructor — 自包含发布版
 
 [中文](#中文) · [English](#english)
 
@@ -41,7 +41,7 @@ OpenCL 调优缓存和模型权重都在目录内，不依赖文件夹外的任�
 │   ├─ analysis_config.cfg       官方 analysis 配置
 │   └─ KataGoData/opencltuning/  已附 OpenCL 调优缓存（免首次自动调优）
 ├─ model/                        冻结模型 g170e-b15c192（9 路可用）
-├─ manual/                       输入棋谱（放你自己的 SGF）
+├─ manual/                       示例棋谱（可替换成你自己的）
 ├─ prediction/                   主程序输出（成功才写 SGF）
 ├─ output/                       prior 脚本的热图与 JSON
 ├─ situation/                    由棋谱生成的终盘局面 SGF
@@ -203,7 +203,7 @@ folder is required.
 │   ├─ analysis_config.cfg       Official analysis config
 │   └─ KataGoData/opencltuning/  Bundled OpenCL tuning cache (no re-tune)
 ├─ model/                        Frozen model g170e-b15c192 (works on 9×9)
-├─ manual/                       Input records (your own SGF files)
+├─ manual/                       Sample record (replace with your own)
 ├─ prediction/                   main.py outputs (SGFs, only on success)
 ├─ output/                       Heatmaps and JSON from prior scripts
 ├─ situation/                    Terminal setup SGFs
