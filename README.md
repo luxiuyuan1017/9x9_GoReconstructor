@@ -1,4 +1,4 @@
-﻿# 9x9 KataReconstructor — 自包含发布版
+﻿# 9x9 GoReconstructor — 自包含发布版
 
 [中文](#中文) · [English](#english)
 
