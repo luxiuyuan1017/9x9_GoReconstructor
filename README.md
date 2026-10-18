@@ -44,7 +44,7 @@ OpenCL 调优缓存和模型权重都在目录内，不依赖文件夹外的任�
 ├─ manual/                       示例棋谱（可替换成你自己的）
 ├─ prediction/                   主程序输出（成功才写 SGF）
 ├─ output/                       prior 脚本的热图与 JSON
-├─ situation/                    由棋谱生成的终盘局面 SGF
+├─ situation/                    由棋谱转换得到的终局局面 SGF（扁平，无子目录）
 ├─ config.toml                   全部可调参数（路径均为相对本文件夹）
 ├─ requirements.txt              Python 依赖
 └─ README.md                     本文件（中英双语）
@@ -69,18 +69,20 @@ conda run -n go python main/main.py
 
 **1) 重建一盘棋（主程序）**
 
+仓库自带一盘 9 路示例棋谱（`manual/`，50 手）。先用转换程序生成它的终局棋谱
+（扁平输出到 `situation/<棋谱名>.sgf`，不建二级文件夹）：
+
+```bash
+python prior/from_manual_to_situation.py
+```
+
+然后直接运行主程序（`INPUT_SGF` 默认就指向这盘示例的终局棋谱）：
+
 ```bash
 python main/main.py
 ```
 
-`main/main.py` 顶部的 `INPUT_SGF` 是**待输入**的（默认空字符串），运行后会提示：
-
-```
-请输入要重建的棋谱/局面 SGF 路径：可直接把文件拖进终端；直接回车退出。
->
-```
-
-把 SGF 文件拖进终端（或粘贴路径）回车即可。也可直接用命令行给路径：
+换一盘棋时，用命令行指定输入（完整棋谱或终局局面都行）：
 
 ```bash
 python main/main.py --input manual/你的棋谱.sgf      # 完整棋谱或终盘局面都行
@@ -88,6 +90,7 @@ python main/main.py --sgf   manual/你的棋谱.sgf      # 明确按"完整棋�
 ```
 
 完整棋谱会自动重放取终盘；只含 `AB`/`AW` 的摆子 SGF 则直接作为目标，程序自动判断。
+若把 `main/main.py` 顶部的 `INPUT_SGF` 留空，运行时会提示输入（支持把 SGF 拖进终端）。
 
 成功时把前 `top_k` 条候选写到 `prediction/`：
 
@@ -104,7 +107,7 @@ prediction/<棋谱名>_summary.json             # 本次搜索的汇总
 **2) 终盘的重建损失热图（黑白各一张）**
 
 ```bash
-python prior/output_reconstruction_loss.py --situation situation/<棋谱名>/final.sgf
+python prior/output_reconstruction_loss.py --situation situation/<棋谱名>.sgf
 ```
 
 **3) 某一手的 KataGo loss 热图**
@@ -122,7 +125,7 @@ python prior/katago_loss_per_move.py --sgf manual/你的棋谱.sgf
 **5) 完整棋谱 -> 只含终盘的摆子局面**
 
 ```bash
-python prior/from_manual_to_situation.py            # 处理 manual/ 下全部 .sgf
+python prior/from_manual_to_situation.py            # 输出 situation/<棋谱名>.sgf
 ```
 
 ### 参数（`config.toml`）
@@ -206,7 +209,7 @@ folder is required.
 ├─ manual/                       Sample record (replace with your own)
 ├─ prediction/                   main.py outputs (SGFs, only on success)
 ├─ output/                       Heatmaps and JSON from prior scripts
-├─ situation/                    Terminal setup SGFs
+├─ situation/                    Terminal setup SGFs (flat, no subfolders)
 ├─ config.toml                   All tunables (paths relative to this folder)
 ├─ requirements.txt              Python dependencies
 └─ README.md                     This file (Chinese + English)
@@ -231,20 +234,20 @@ conda run -n go python main/main.py
 
 **1) Reconstruct a game (main program)**
 
+A sample 9x9 record (50 moves) ships in `manual/`. Convert it to a terminal setup SGF
+first (flat output: `situation/<name>.sgf`, no subfolders):
+
+```bash
+python prior/from_manual_to_situation.py
+```
+
+Then run the main program; `INPUT_SGF` already points at this sample's terminal SGF:
+
 ```bash
 python main/main.py
 ```
 
-`INPUT_SGF` at the top of `main/main.py` is **pending input** (empty by default); the
-program prompts for a path:
-
-```
-请输入要重建的棋谱/局面 SGF 路径：可直接把文件拖进终端；直接回车退出。
->
-```
-
-Drag an SGF file into the terminal (or paste a path) and press Enter. You can also pass
-the path directly:
+To use another game, pass the path explicitly (record or setup SGF):
 
 ```bash
 python main/main.py --input manual/your_game.sgf      # record or setup SGF
@@ -252,7 +255,8 @@ python main/main.py --sgf   manual/your_game.sgf      # force "complete record" 
 ```
 
 Complete records are replayed to obtain the terminal position; setup-only SGFs
-(`AB`/`AW`) are used directly. The mode is detected automatically.
+(`AB`/`AW`) are used directly. The mode is detected automatically. If `INPUT_SGF` is left
+empty, the program prompts for a path (drag-and-drop works).
 
 On success the top `top_k` candidates are written to `prediction/`:
 
@@ -270,7 +274,7 @@ text message is printed.
 **2) Fixed terminal reconstruction loss (one heatmap per colour)**
 
 ```bash
-python prior/output_reconstruction_loss.py --situation situation/<name>/final.sgf
+python prior/output_reconstruction_loss.py --situation situation/<name>.sgf
 ```
 
 **3) KataGo loss heatmap for one move**
@@ -288,7 +292,7 @@ python prior/katago_loss_per_move.py --sgf manual/your_game.sgf
 **5) Complete record -> terminal-only setup SGF**
 
 ```bash
-python prior/from_manual_to_situation.py     # all .sgf under manual/
+python prior/from_manual_to_situation.py     # writes situation/<name>.sgf
 ```
 
 ### Parameters (`config.toml`)

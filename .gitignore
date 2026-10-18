@@ -6,7 +6,7 @@ __pycache__/
 # 运行产物
 output/
 prediction/
-situation/
+situation/index.json
 analysis_logs/
 *.log
 

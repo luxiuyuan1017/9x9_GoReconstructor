@@ -3,11 +3,13 @@
 按项目说明第 11 节的数据制作要求：输入必须由完整真实棋谱**重放**后新建只含终盘的
 摆子 SGF，不能直接拿棋谱当输入（读取端也会拒绝含 B/W 着手的文件）。
 
+输出为**扁平结构**：``situation/<棋谱名>.sgf``，不建二级文件夹。
+
 用法示例::
 
     python prior/from_manual_to_situation.py
     python prior/from_manual_to_situation.py --input manual/xxx.sgf
-    python prior/from_manual_to_situation.py --save-original   # 额外另存原始顺序备用
+    python prior/from_manual_to_situation.py --save-original   # 另存 <棋谱名>_original.sgf
 """
 
 from __future__ import annotations
@@ -29,6 +31,14 @@ DEFAULT_MANUAL_DIR = PROJECT_ROOT / "manual"
 DEFAULT_SITUATION_DIR = PROJECT_ROOT / "situation"
 
 
+def _rel(p: Path) -> str:
+    """尽量写成相对项目根的路径，便于把生成结果直接提交/分享。"""
+    try:
+        return str(p.resolve().relative_to(PROJECT_ROOT))
+    except ValueError:
+        return str(p)
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="真实棋谱 -> 只含终盘的标准化局面 SGF")
     parser.add_argument("--manual-dir", default=str(DEFAULT_MANUAL_DIR), help="棋谱目录")
@@ -37,7 +47,7 @@ def build_parser() -> argparse.ArgumentParser:
                         help="指定棋谱文件（默认处理 --manual-dir 下全部 .sgf）")
     parser.add_argument("--pattern", default="*.sgf", help="棋谱文件匹配模式")
     parser.add_argument("--save-original", action="store_true",
-                        help="额外把原始顺序棋谱另存到 _original/，仅供评测（默认不生成）")
+                        help="额外另存原始顺序棋谱为 <棋谱名>_original.sgf，仅供评测（默认不生成）")
     parser.add_argument("--komi", type=float, default=None, help="覆盖贴目（默认取棋谱中的 KM）")
     parser.add_argument("--rules", default=None, help="覆盖规则名（默认取棋谱中的 RU）")
     return parser
@@ -70,26 +80,24 @@ def convert_one(path: Path, args: argparse.Namespace) -> dict:
     total_captured = sum(len(c) for c in captured_all)
 
     name = path.stem
-    out_dir = Path(args.out_dir) / name
+    out_dir = Path(args.out_dir)          # 扁平输出：不再按棋谱名建子文件夹
     out_dir.mkdir(parents=True, exist_ok=True)
 
     comment = (f"来源 {path.name} 第 {len(record.moves)} 手后（终盘）；"
                f"原棋谱共 {len(record.moves)} 手，累计被提 {total_captured} 子")
-    target = out_dir / "final.sgf"
+    target = out_dir / f"{name}.sgf"
     write_position(target, position_from_record(record), comment=comment)
 
-    written = [str(target)]
+    written = [_rel(target)]
     if args.save_original:
-        original_dir = Path(args.out_dir) / "_original"
-        original_dir.mkdir(parents=True, exist_ok=True)
-        original_path = original_dir / f"{name}.sgf"
+        original_path = Path(args.out_dir) / f"{name}_original.sgf"
         write_moves(original_path, list(record.moves), size=record.size, komi=record.komi,
                     rules=record.rules,
                     comment=f"原始顺序副本，仅供评测，不得作为搜索输入。来源 {path.name}")
-        written.append(str(original_path))
+        written.append(_rel(original_path))
 
     return {
-        "source": str(path),
+        "source": _rel(path),
         "name": name,
         "size": record.size,
         "komi": record.komi,
@@ -134,7 +142,8 @@ def main(argv: list[str] | None = None) -> int:
 
     index_path = out_root / "index.json"
     payload = {
-        "note": "由 prior/from_manual_to_situation.py 生成；每份棋谱输出一个只含终盘的摆子 SGF。",
+        "note": "由 prior/from_manual_to_situation.py 生成；每份棋谱输出一个只含终盘的摆子 SGF，"
+                "扁平存为 situation/<棋谱名>.sgf。",
         "position_point_order": "row-major, row 0 = top, col 0 = left",
         "games": records,
     }
